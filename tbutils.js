@@ -1009,7 +1009,7 @@ function initwrapper() {
             i = 0,
             now = function(){ return window.performance.now(); },
             again = (typeof window.requestAnimationFrame == 'function')? function(callback){ window.requestAnimationFrame(callback); }
-                  :  function(callback){ setTimeout(callback, 1000/60); };
+                  :  function(callback){ setTimeout(callback, 1000/60); },
             opt = {
                 size: 10,
                 copy: true,
@@ -1038,7 +1038,7 @@ function initwrapper() {
             fr = 1000/(stop - start);
             factor = 1 + (fr/framerate - 1)*nerf;
             size = Math.ceil(size*factor);
-            return start = stop;
+            return (start = stop);
         };
 
         var doChunk = function(){
