@@ -991,6 +991,63 @@ function initwrapper() {
         return content;
     };
 
+    TBUtils.forEachChunkedDynamic = function (array, process, done, options){
+        //can also call with object literal: (array, { process, done, [framerate, size] } )
+        //can also call with object literal: (array, { process, done, [framerate, size] } )
+        if(!Array.isArray(array)) return false;
+        var nerf = 0.75,
+            start,
+            stop,
+            size,
+            framerate,
+            fr,
+            chunk,
+            i = 0,
+            now = function(){ return window.performance.now(); },
+            opt = {
+                size: 10,
+                copy: true,
+                framerate: 30,
+                process: process,
+                done: done,
+        };
+
+        Object.assign(opt, options);
+        if(typeof process == 'object')  Object.assign(opt, process);
+        else if(typeof done == 'object') Object.assign(opt, done);
+
+        if(!(typeof (process = opt.process) == 'function') || !(typeof (size = opt.size) == 'number') || !(typeof (framerate = opt.framerate) == 'number')){
+            self.log('You dun goofed!', arguments);
+            return false;
+        }
+
+        done = typeof opt.done == 'function'? opt.done : function(){};
+
+        if(opt.copy) array = array.concat();
+        function optimize(){
+            stop = now();
+            fr = 1000/(stop - start);
+            factor = 1 + (fr/framerate - 1)*nerf;
+            size = Math.ceil(size*factor);
+            return start = stop;
+        }
+
+        function doChunk(){
+            if(!array.length) return done();
+            if(i++) optimize();
+            try{
+                array.splice(0, size).forEach(process);
+            } catch (error){
+                self.log(error);
+                return done();
+            }
+
+            window.requestAnimationFrame( doChunk );
+        }
+        start = now();
+        doChunk.call(true);
+    };
+
 
     // Prevent page lock while parsing things.  (stolen from RES)
     TBUtils.forEachChunked = function (array, chunkSize, delay, call, complete, start) {
