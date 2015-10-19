@@ -1012,7 +1012,7 @@ function initwrapper() {
                 size: 25,
                 copy: true,
                 framerate: 24,
-                nerf: 0.75,
+                nerf: 0.75,//Be careful with this one.
                 process: process,
                 done: done,
                 error: error,
