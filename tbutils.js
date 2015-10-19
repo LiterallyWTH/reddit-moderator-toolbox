@@ -1036,6 +1036,7 @@ function initwrapper() {
         Object.assign(opt, options);
         if(typeof process == 'object')  Object.assign(opt, process);
         else if(typeof then == 'object') Object.assign(opt, then);
+        else if(typeof error == 'object') Object.assign(opt, error);
 
         then = (typeof opt.then == 'function')? opt.then : function(){};
         error = (typeof opt.error == 'function')? opt.error : function(){};
@@ -1063,7 +1064,7 @@ function initwrapper() {
                 arr.splice(0, size).forEach(process);
             } catch(err) {
                 self.log(err);
-                return error(err);
+                return failOut(err);
             }
 
             if( array.length) return again( doChunk );
