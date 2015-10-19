@@ -1058,7 +1058,6 @@ function initwrapper() {
         doChunk.call(true);
     };
 
-
     // Prevent page lock while parsing things.  (stolen from RES)
     TBUtils.forEachChunked = function (array, chunkSize, delay, call, complete, start) {
         if (array === null) finish();
