@@ -992,9 +992,10 @@ function initwrapper() {
     };
 
     TBUtils.forEachChunkedDynamic = function (array, process, done, error, options){
-        //Syntax: forEachChunkedDynamic(array, process, [done, options]);
+        //Syntax: forEachChunkedDynamic(array, process, [done, error, options]);
         //process & done are functions, options is an object literal.
         //can also call with object literal for 2nd, 3rd, or 4th arg: (array, { process, [done, framerate, size] } )
+        //also can be process, done, error, can be set with 'promises-ish': ().do(process).done(done).error(error)
 
         /*   Initialization   */
         var start,
@@ -1069,9 +1070,9 @@ function initwrapper() {
             return  done(array);
         };
 
-        function failOut(a){
+        function failOut(){
             self.log('You dun goofed!', arguments);
-            again( function (){ error(a); } );
+            again( function (){ error(arguments, process, done); } );
             return promise;
         }
 
