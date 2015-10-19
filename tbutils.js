@@ -1011,7 +1011,7 @@ function initwrapper() {
             again = (typeof window.requestAnimationFrame == 'function')? function(callback){ window.requestAnimationFrame(callback); }
                   :  function(callback){ setTimeout(callback, 1000/60); },
             opt = {
-                size: 10,
+                size: 25,
                 copy: true,
                 framerate: 24,
                 process: process,
@@ -1021,7 +1021,6 @@ function initwrapper() {
         Object.assign(opt, options);
         if(typeof process == 'object')  Object.assign(opt, process);
         else if(typeof done == 'object') Object.assign(opt, done);
-
 
         if(!(typeof (process = opt.process) == 'function') || !(typeof (size = opt.size) == 'number') || !(typeof (framerate = opt.framerate) == 'number')){
             self.log('You dun goofed!', arguments);
