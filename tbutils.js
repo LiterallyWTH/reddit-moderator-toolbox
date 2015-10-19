@@ -1037,7 +1037,6 @@ function initwrapper() {
         error = (typeof opt.error == 'function')? opt.error : function(){};
 
         if(!(typeof (process = opt.process) == 'function') || !(typeof (size = opt.size) == 'number') || !(typeof (framerate = opt.framerate) == 'number')){
-            self.log('You dun goofed!', arguments);
             return failOut(arguments);
         }
 
@@ -1069,6 +1068,7 @@ function initwrapper() {
         };
 
         function failOut(a){
+            self.log('You dun goofed!', arguments);
             again( function (){ error(a); } );
             return promise;
         }
