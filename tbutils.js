@@ -1007,7 +1007,7 @@ function initwrapper() {
             opt = {
                 size: 10,
                 copy: true,
-                framerate: 30,
+                framerate: 24,
                 process: process,
                 done: done,
         };
