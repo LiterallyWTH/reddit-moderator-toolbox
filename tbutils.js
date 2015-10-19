@@ -1000,6 +1000,7 @@ function initwrapper() {
         var start,
             stop,
             size,
+            nerf,
             framerate,
             fr,
             arr,
@@ -1010,14 +1011,17 @@ function initwrapper() {
                   :  function(callback){ setTimeout(callback, 1000/60); },
             opt = {
                 size: 25,
-                copy: true,
                 framerate: 24,
                 nerf: 0.75,//Be careful with this one.
-                process: process,
+                do: process,
                 done: done,
                 error: error,
             },
             promise = {
+                do: function(callback){
+                    process = callback;
+                    return promise;
+                },
                 then: function(callback){
                     done = callback;
                     return promise;
@@ -1032,19 +1036,17 @@ function initwrapper() {
         if(typeof process == 'object')  Object.assign(opt, process);
         else if(typeof done == 'object') Object.assign(opt, done);
 
-
         done = (typeof opt.done == 'function')? opt.done : function(){};
         error = (typeof opt.error == 'function')? opt.error : function(){};
 
-        if(!(typeof (process = opt.process) == 'function') || !(typeof (size = opt.size) == 'number') || !(typeof (framerate = opt.framerate) == 'number')){
+        if(!(typeof (size = opt.size) == 'number') || !(typeof (framerate = opt.framerate) == 'number') || !(typeof (nerf = opt.nerf) == 'number')){
             return failOut(arguments);
         }
 
         if(!Array.isArray(array)) return failOut(arguments);
 
-        if(opt.copy) arr = array.concat();
+        arr = array.concat();
 
-        /*   Magic   */
         var optimize = function(){
             stop = now();
             fr = 1000/(stop - start);
