@@ -991,21 +991,20 @@ function initwrapper() {
         return content;
     };
 
-    TBUtils.forEachChunkedDynamic = function (array, process, done, options){
+    TBUtils.forEachChunkedDynamic = function (array, process, done, error, options){
         //Syntax: forEachChunkedDynamic(array, process, [done, options]);
         //process & done are functions, options is an object literal.
-        //can also call with object literal for 2nd arg: (array, { process, [done, framerate, size] } )
-        //can also call with object literal for 3rd arg: (array, process, [{ done, framerate, size }] )
+        //can also call with object literal for 2nd, 3rd, or 4th arg: (array, { process, [done, framerate, size] } )
 
         /*   Initialization   */
-        if(!Array.isArray(array)) return false;
         var nerf = 0.75,
             start,
             stop,
             size,
             framerate,
             fr,
-            chunk,
+            arr,
+            self = self || console,
             i = 0,
             now = function(){ return window.performance.now(); },
             again = (typeof window.requestAnimationFrame == 'function')? function(callback){ window.requestAnimationFrame(callback); }
@@ -1016,20 +1015,35 @@ function initwrapper() {
                 framerate: 24,
                 process: process,
                 done: done,
+                error: error,
+            },
+            promise = {
+                then: function(callback){
+                    done = callback;
+                    return promise;
+                },
+                error: function(callback){
+                    error = callback;
+                    return promise;
+                },
             };
 
         Object.assign(opt, options);
         if(typeof process == 'object')  Object.assign(opt, process);
         else if(typeof done == 'object') Object.assign(opt, done);
 
-        if(!(typeof (process = opt.process) == 'function') || !(typeof (size = opt.size) == 'number') || !(typeof (framerate = opt.framerate) == 'number')){
-            self.log('You dun goofed!', arguments);
-            return false;
-        }
 
         done = (typeof opt.done == 'function')? opt.done : function(){};
+        error = (typeof opt.error == 'function')? opt.error : function(){};
 
-        if(opt.copy) array = array.concat();
+        if(!(typeof (process = opt.process) == 'function') || !(typeof (size = opt.size) == 'number') || !(typeof (framerate = opt.framerate) == 'number')){
+            self.log('You dun goofed!', arguments);
+            return failOut(arguments);
+        }
+
+        if(!Array.isArray(array)) return failOut(arguments);
+
+        if(opt.copy) arr = array.concat();
 
         /*   Magic   */
         var optimize = function(){
@@ -1041,20 +1055,28 @@ function initwrapper() {
         };
 
         var doChunk = function(){
-            if(!array.length) return done();
             if(i++) optimize();
+
             try{
-                array.splice(0, size).forEach(process);
-            } catch (error){
-                self.log(error);
-                return done();
+                arr.splice(0, size).forEach(process);
+            } catch(err) {
+                self.log(err);
+                return error(err);
             }
 
-            again( doChunk );
+            if( array.length) return again( doChunk );
+            return  done(array);
         };
 
+        function failOut(a){
+            again( function (){ error(a); } );
+            return promise;
+        }
+
         start = now();
-        doChunk.call(true);
+        again( doChunk.bind(this, true) );
+
+        return promise;
     };
 
     // Prevent page lock while parsing things.  (stolen from RES)
