@@ -992,8 +992,12 @@ function initwrapper() {
     };
 
     TBUtils.forEachChunkedDynamic = function (array, process, done, options){
-        //can also call with object literal: (array, { process, done, [framerate, size] } )
-        //can also call with object literal: (array, { process, done, [framerate, size] } )
+        //Syntax: forEachChunkedDynamic(array, process, [done, options]);
+        //process & done are functions, options is an object literal.
+        //can also call with object literal for 2nd arg: (array, { process, [done, framerate, size] } )
+        //can also call with object literal for 3rd arg: (array, process, [{ done, framerate, size }] )
+
+        /*   Initialization   */
         if(!Array.isArray(array)) return false;
         var nerf = 0.75,
             start,
@@ -1004,35 +1008,40 @@ function initwrapper() {
             chunk,
             i = 0,
             now = function(){ return window.performance.now(); },
+            again = (typeof window.requestAnimationFrame == 'function')? function(callback){ window.requestAnimationFrame(callback); }
+                  :  function(callback){ setTimeout(callback, 1000/60); };
             opt = {
                 size: 10,
                 copy: true,
                 framerate: 24,
                 process: process,
                 done: done,
-        };
+            };
 
         Object.assign(opt, options);
         if(typeof process == 'object')  Object.assign(opt, process);
         else if(typeof done == 'object') Object.assign(opt, done);
+
 
         if(!(typeof (process = opt.process) == 'function') || !(typeof (size = opt.size) == 'number') || !(typeof (framerate = opt.framerate) == 'number')){
             self.log('You dun goofed!', arguments);
             return false;
         }
 
-        done = typeof opt.done == 'function'? opt.done : function(){};
+        done = (typeof opt.done == 'function')? opt.done : function(){};
 
         if(opt.copy) array = array.concat();
-        function optimize(){
+
+        /*   Magic   */
+        var optimize = function(){
             stop = now();
             fr = 1000/(stop - start);
             factor = 1 + (fr/framerate - 1)*nerf;
             size = Math.ceil(size*factor);
             return start = stop;
-        }
+        };
 
-        function doChunk(){
+        var doChunk = function(){
             if(!array.length) return done();
             if(i++) optimize();
             try{
@@ -1042,8 +1051,9 @@ function initwrapper() {
                 return done();
             }
 
-            window.requestAnimationFrame( doChunk );
-        }
+            again( doChunk );
+        };
+
         start = now();
         doChunk.call(true);
     };
