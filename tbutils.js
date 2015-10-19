@@ -991,11 +991,11 @@ function initwrapper() {
         return content;
     };
 
-    TBUtils.forEachChunkedDynamic = function (array, process, done, error, options){
-        //Syntax: forEachChunkedDynamic(array, process, [done, error, options]);
-        //process & done are functions, options is an object literal.
-        //can also call with object literal for 2nd, 3rd, or 4th arg: (array, { process, [done, framerate, size] } )
-        //also can be process, done, error, can be set with 'promises-ish': ().do(process).done(done).error(error)
+    TBUtils.forEachChunkedDynamic = function (array, process, then, error, options){
+        //Syntax: forEachChunkedDynamic(array, process, [then, error, options]);
+        //process & then are functions, options is an object literal.
+        //can also call with object literal for 2nd, 3rd, or 4th arg: (array, { process, [then, framerate, size] } )
+        //also can be process, then, error, can be set with 'promises-ish': ().do(process).then(then).error(error)
 
         /*   Initialization   */
         var start,
@@ -1015,7 +1015,7 @@ function initwrapper() {
                 framerate: 24,
                 nerf: 0.75,//Be careful with this one.
                 do: process,
-                done: done,
+                then: then,
                 error: error,
             },
             promise = {
@@ -1024,7 +1024,7 @@ function initwrapper() {
                     return promise;
                 },
                 then: function(callback){
-                    done = callback;
+                    then = callback;
                     return promise;
                 },
                 error: function(callback){
@@ -1035,9 +1035,9 @@ function initwrapper() {
 
         Object.assign(opt, options);
         if(typeof process == 'object')  Object.assign(opt, process);
-        else if(typeof done == 'object') Object.assign(opt, done);
+        else if(typeof then == 'object') Object.assign(opt, then);
 
-        done = (typeof opt.done == 'function')? opt.done : function(){};
+        then = (typeof opt.then == 'function')? opt.then : function(){};
         error = (typeof opt.error == 'function')? opt.error : function(){};
 
         if(!(typeof (size = opt.size) == 'number') || !(typeof (framerate = opt.framerate) == 'number') || !(typeof (nerf = opt.nerf) == 'number')){
@@ -1067,12 +1067,12 @@ function initwrapper() {
             }
 
             if( array.length) return again( doChunk );
-            return  done(array);
+            return  then(array);
         };
 
         function failOut(){
             self.log('You dun goofed!', arguments);
-            again( function (){ error(arguments, process, done); } );
+            again( function (){ error(arguments, process, then); } );
             return promise;
         }
 
