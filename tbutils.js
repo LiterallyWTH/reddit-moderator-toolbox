@@ -997,8 +997,7 @@ function initwrapper() {
         //can also call with object literal for 2nd, 3rd, or 4th arg: (array, { process, [done, framerate, size] } )
 
         /*   Initialization   */
-        var nerf = 0.75,
-            start,
+        var start,
             stop,
             size,
             framerate,
@@ -1013,6 +1012,7 @@ function initwrapper() {
                 size: 25,
                 copy: true,
                 framerate: 24,
+                nerf: 0.75,
                 process: process,
                 done: done,
                 error: error,
